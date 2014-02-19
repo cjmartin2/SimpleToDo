@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Awesome ToDo</string>
+    <string name="action_settings">Settings</string>
+    <string name="new_item_hint">Enter new item</string>
+    <string name="add_btn">Add</string>
+    <string name="added_toast">Added \&quot;%1$s\&quot;</string>
+    <string name="removed_toast">Removed \&quot;%1$s\&quot;</string>
+    <string name="edit_item_title">Edit Item Below:</string>
+    <string name="save_btn">Save</string>
+    <string name="edit_item_header">Edit Item</string>
+    <string name="edit_item_hint">Enter item</string>
+    <string name="updated_toast">Updated item \&quot;%1$s\&quot;</string>
+
+</resources>
