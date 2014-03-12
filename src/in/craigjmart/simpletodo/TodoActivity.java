@@ -6,6 +6,12 @@ import java.util.ArrayList;
 
 import org.apache.commons.io.FileUtils;
 
+import com.parse.GetCallback;
+import com.parse.Parse;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+import com.parse.ParseException;
+
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
@@ -23,6 +29,7 @@ public class TodoActivity extends Activity {
 	ArrayList<String> items;
 	ArrayAdapter<String> itemsAdapter;
 	ListView lvItems;
+    ParseObject toDoItems;
 	
 	private final int REQUEST_CODE = 201;
 
@@ -30,13 +37,26 @@ public class TodoActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_todo);
-        
-        readItems();
-        lvItems = (ListView) findViewById(R.id.lvItems);
-        itemsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items);
-        lvItems.setAdapter(itemsAdapter);
-        
-        setupListViewListener();
+        Parse.initialize(this, "M6gXamHEH5Evs59YwKswZvqEyb38ljbVUDiI5OUY", "Uteake7xbUDDBV23I9fnLrN70AKDxhIBJ6yOut9O");
+
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("toDoItems");
+        //cheating here, but know I only have 1 row in this table, so just get it
+        query.getFirstInBackground(new GetCallback<ParseObject>() {
+            public void done(ParseObject parseItems, ParseException e) {
+                if (e == null) {
+                    //set the toDoItems if they exist
+                    toDoItems = parseItems;
+                } else {
+                    toDoItems = new ParseObject("toDoItems");
+                }
+                readItems();
+                lvItems = (ListView) findViewById(R.id.lvItems);
+                itemsAdapter = new ArrayAdapter<String>(TodoActivity.this, android.R.layout.simple_list_item_1, items);
+                lvItems.setAdapter(itemsAdapter);
+
+                setupListViewListener();
+            }
+        });
     }
 
 
@@ -90,6 +110,18 @@ public class TodoActivity extends Activity {
     		items = new ArrayList<String>();
     		e.printStackTrace();
     	}
+
+        ArrayList<String> parseItems = (ArrayList)toDoItems.getList("items");
+        if(parseItems == null){
+            parseItems = new ArrayList<String>();
+        }
+
+        //add any parse items to the local cache
+        ArrayList<String> parseCopy = new ArrayList<String>(parseItems);
+        //ghetto way to remove dupes, realized Parse already supports local caching if I set the 
+        //cache policy, so gave up on doing this a 'pretty' way.
+        parseCopy.removeAll(items);
+        items.addAll(parseCopy);
 	}
     
     private void saveItems() {
@@ -101,6 +133,10 @@ public class TodoActivity extends Activity {
     	} catch(IOException e){
     		e.printStackTrace();
     	}
+
+        //store new items list in Parse
+        toDoItems.put("items", items);
+        toDoItems.saveInBackground();
 	}
     
     private void openEditView(int pos) {
